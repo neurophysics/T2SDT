@@ -2,17 +2,11 @@
 Calculate the type 2 Signal Detection Theory (SDT) measure meta-d'
 according to the method described in:
 
-    Maniscalco, B., & Lau, H. (2012). A signal detection theoretic
-    approach for estimating metacognitive sensitivity from confidence
-    ratings. Consciousness and Cognition, 21(1), 422-430.
-    doi:10.1016/j.concog.2011.09.021
+> Maniscalco, B., & Lau, H. (2012). A signal detection theoretic approach for estimating metacognitive sensitivity from confidence ratings. Consciousness and Cognition, 21(1), 422-430. doi:10.1016/j.concog.2011.09.021
 
 and
 
-    Maniscalco, B., & Lau, H. (2014). Signal detection theory analysis of
-    type 1 and type 2 data: meta-d', response-specific meta-d', and the
-    unequal variance SDT mode. In S. M. Fleming & C. D. Frith (Eds.),
-    The Cognitive Neuroscience of Metacognition (pp.25-66). Springer.
+> Maniscalco, B., & Lau, H. (2014). Signal detection theory analysis of type 1 and type 2 data: meta-d', response-specific meta-d', and the unequal variance SDT mode. In S. M. Fleming & C. D. Frith (Eds.), The Cognitive Neuroscience of Metacognition (pp.25-66). Springer.
 
 Only the equal variance approach and normally distributed inner decision
 variables are currently supported. Additionally, currently only the overall
@@ -39,9 +33,11 @@ from data using the function confusion_matrix
 After initialization, the fit() method of the class can be used to fit
 the type 2 SDT model to the supplied data.
 
->>> model = T2SDT(conf_matrix, adjust=True)
->>> model.fit()
->>> meta_d = model.meta_d
+```
+model = T2SDT(conf_matrix, adjust=True)
+model.fit()
+meta_d = model.meta_d
+```
 
 The docstring included in the code provides more information about the
 calculated parameters and the usage.

@@ -40,6 +40,7 @@ import numpy as np
 from scipy.stats import norm
 from scipy.optimize import minimize
 import warnings
+from builtins import range
 
 # ignore division by 0 and invalid numerical operations
 np.seterr(invalid='ignore', divide='ignore')
@@ -230,7 +231,7 @@ class T2SDT(object):
             log_cumprobs_der = cumprobs_der[...,1:]*self.conf_matrix/probs
             log_cumprobs_diff_der = cumprobs_der_diff[
                     ...,1:]*self.conf_matrix[...,1:]/probs[...,1:]
-            for i in xrange(self.max_conf):
+            for i in range(self.max_conf):
                 total_logp_der[np.array([i + 1, i + 1 + self.max_conf])] = (
                         log_cumprobs_diff_der[...,i:].sum(0).sum(-1) -
                         log_cumprobs_der[...,i].sum(0))
@@ -391,9 +392,9 @@ if __name__ == "__main__":
             max_conf=2)
     model = T2SDT(conf_matrix, adjust=False)
     model.fit()
-    print 'Results of the simuluated type 2 SDT'
-    print '------------------------------------'
-    print 'Fitting success: %s' % model.success
-    print 'Fitting message. %s' % model.fit_message
-    print 'd\': %.2f, meta-d\': %.2f, c: %.2f, meta-c: %.2f, logL: %.2f' % (
-            model.d, model.meta_d, model.c, model.meta_c, model.logL)
+    print('Results of the simuluated type 2 SDT')
+    print('------------------------------------')
+    print('Fitting success: %s' % model.success)
+    print('Fitting message. %s' % model.fit_message)
+    print('d\': %.2f, meta-d\': %.2f, c: %.2f, meta-c: %.2f, logL: %.2f' % (
+            model.d, model.meta_d, model.c, model.meta_c, model.logL))

@@ -22,6 +22,15 @@ results might be wrong you must absolutely not use this software for a
 medical purpuse - decisions concerning diagnosis, treatment or prophylaxis
 ***************************************************************************
 
+Prerequisites:
+--------------
+The Code was verified to work with Python 2.7 and 3.6 although older
+versions might work as will.
+
+Additionally the following python packages are required:
+- numpy
+- scipy
+
 Usage:
 ------
 The class T2SDT implements the optimization of the type 2 SDT model.

@@ -40,7 +40,6 @@ import numpy as np
 from scipy.stats import norm
 from scipy.optimize import minimize
 import warnings
-from builtins import range
 
 # ignore division by 0 and invalid numerical operations
 np.seterr(invalid='ignore', divide='ignore')

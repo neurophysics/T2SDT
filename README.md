@@ -27,7 +27,7 @@ Usage:
 The class T2SDT implements the optimization of the type 2 SDT model.
 As data, a confusion matrix (including confidence ratings) should be given.
 
-The confusion matrix (including condidence ratings) can be calculated
+The confusion matrix (including confidence ratings) can be calculated
 from data using the function confusion_matrix:
 
 ```

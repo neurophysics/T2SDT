@@ -27,7 +27,7 @@ Prerequisites:
 The Code was verified to work with Python 2.7 and 3.6 although older
 versions might work as will.
 
-Additionally the following python packages are required:
+Additionally, the following python packages are required:
 - numpy
 - scipy
 

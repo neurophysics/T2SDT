@@ -28,15 +28,22 @@ The class T2SDT implements the optimization of the type 2 SDT model.
 As data, a confusion matrix (including confidence ratings) should be given.
 
 The confusion matrix (including condidence ratings) can be calculated
-from data using the function confusion_matrix
-
-After initialization, the fit() method of the class can be used to fit
-the type 2 SDT model to the supplied data.
+from data using the function confusion_matrix:
 
 ```
-model = T2SDT(conf_matrix, adjust=True)
-model.fit()
-meta_d = model.meta_d
+conf_matrix = confusion_matrix(true_label, pred_label, rating)
+```
+
+After initialization, the fit() method of the class can be used to fit
+the type 2 SDT model to the supplied data:
+
+```
+model = T2SDT(conf_matrix, adjust=True) # initialize the model
+model.fit() # fit the model
+# extract the parameters of the fitted model
+d = model.d # the d' of the type 1 task
+c = model.c # the response bias c of the type 1 task
+meta_d = model.meta_d # the meta-d' of the type 2 task
 ```
 
 The docstring included in the code provides more information about the

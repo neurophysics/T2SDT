@@ -61,8 +61,7 @@ Notes:
 ------
 The performance of this code was compared to the Matlab code available
 at http://www.columbia.edu/~bsm2105/type2sdt/
-Results were equivalent (this python implementation gave slightly larger
-log-likelihoods of the results).
+Results were equivalent. However, the Python code was about 15x faster.
 
 ***************************************************************************
 

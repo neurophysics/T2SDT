@@ -1,6 +1,6 @@
 """
-Calculate the type 2 Signal Detection Theory (SDT) measure meta-d'
-according to the method described in
+Calculate the type 2 Signal Detection Theory (SDT) measure meta-d' for the
+S1 and S2 responses according to the method described in:
 
 Maniscalco, B., & Lau, H. (2012). A signal detection theoretic approach
 for estimating metacognitive sensitivity from confidence ratings.
@@ -15,8 +15,8 @@ unequal variance SDT mode. In S. M. Fleming & C. D. Frith (Eds.),
 The Cognitive Neuroscience of Metacognition (pp.25-66). Springer.
 
 Only the equal variance approach and normally distributed inner decision
-variables are currently supported. Additionally, only the overall type 2
-meta-d' is calculated (i.e. not response specific meta-d' variables)
+variables are currently supported. The function calculates the
+response-specific meta-d' variables.
 
 The performance of this code was compared to the Matlab code available
 at http://www.columbia.edu/~bsm2105/type2sdt/
@@ -59,32 +59,52 @@ class T2SDT(object):
             denotes the ability to discriminate between S1 (stim. absent)
             and S2 (stim present) trials in standard deviation units
         c (float): the response bias of the type 1 classification task
-        meta_d (float): the meta-d' measure
+        meta_d_S1 (float): the meta-d' measure for S1 responses
             denotes the ability of the subject to discriminate between
-            correct and incorrect responses in the same units as those of
+            correct and incorrect S1 responses in the same units as those of
             the type 1 task, only available after calling the fit method
-        meta_c (float): the overall response bias of the type 2 task
-            meta_c is calculated such that meta_c' = c', where
-            c' = c/d' and meta_c' = meta_c/meta_d'
+        meta_d_S2 (float): the meta-d' measure for S2 responses
+            denotes the ability of the subject to discriminate between
+            correct and incorrect S2 responses in the same units as those of
+            the type 1 task, only available after calling the fit method
+        meta_c_S1 (float): the response bias of the type 2 task for S1
+            responses
+            meta_c_S1 is calculated such that meta_c_S1' = c', where
+            c' = c/d' and meta_c_S1' = meta_c_S1/meta_d_S1'
             only available after calling the fit method
-        meta_c_S1 (array of floats): the decision criteria for each
+        meta_c_S2 (float): the response bias of the type 2 task for S2
+            responses
+            meta_c_S2 is calculated such that meta_c_S2' = c', where
+            c' = c/d' and meta_c_S2' = meta_c_S2/meta_d_S2'
+            only available after calling the fit method
+        meta_c2_S1 (array of floats): the decision criteria for each
             confidence level if the response had been "S1" (stim. absent)
-            meta_c_S1[0] belongs to confidence==1
-            meta_c_S1[0] belongs to confidence==2
+            meta_c2_S1[0] belongs to confidence==1
+            meta_c2_S1[0] belongs to confidence==2
             etc.
-            meta_c_S1[0]>=meta_c_S1[1]>=meta_cS1[2] ...
+            meta_c2_S1[0]>=meta_c2_S1[1]>=meta_c2_S1[2] ... >= meta_c_S1
             only available after calling the fit method
-        meta_c_S2 (array of floats): the decision criteria for each
+        meta_c2_S2 (array of floats): the decision criteria for each
             confidence level if the response had been "S2" (stim. present)
-            meta_c_S2[0] belongs to confidence==1
-            meta_c_S2[0] belongs to confidence==2
+            meta_c2_S2[0] belongs to confidence==1
+            meta_c2_S2[0] belongs to confidence==2
             etc.
-            meta_c_S2[0]<=meta_c_S2[1]<=meta_cS2[2] ...
+            meta_c2_S2[0]<=meta_c2_S2[1]<=meta_c2_S2[2] ... <= meta_c_S2
             only available after calling the fit method
-        logL (float): the log-likelihood of the model
-        success (bool): whether the fitting was successful
+        logL_S1 (float): the log-likelihood of the model for S1 responses;
             only available after calling the fit method
-        fit_message (str): the message output by the optimization algorithm
+        logL_S2 (float): the log-likelihood of the model for S2 responses;
+            only available after calling the fit method
+        success_S1 (bool): whether the fitting was successful for S1
+            responses; only available after calling the fit method
+        success_S2 (bool): whether the fitting was successful for S2
+            responses; only available after calling the fit method
+        fit_message_S1 (str): the message output by the optimization
+            algorithm for S1 responses; only available after calling the
+            fit method
+        fit_message_S2 (str): the message output by the optimization
+            algorithm for S2 responses; only available after calling the
+            fit method
     """
 
     def __init__(self, conf_matrix, adjust=False):
@@ -142,22 +162,41 @@ class T2SDT(object):
         """
         Fit the type 2 SDT model to maximize log-likelihood between the
         model and the obervations.
-        This generates the attributes meta_d, meta_c, meta_c_S1, meta_c_S2
+        This generates the attributes meta_d_S1, meta_c_S1, meta_c_S2,
+        meta_c2_S1, meta_c2_S2
         """
-        result = minimize(self._get_log_likelihood,
-                x0 = [0] + self.max_conf*[-0.1] + self.max_conf*[0.1],
+        ###############################
+        # fit meta_d for S1 responses #
+        ###############################
+        result_S1 = minimize(self._get_log_likelihood,
+                x0 = [0] + self.max_conf*[-0.1],
+                args = ('S1',),
                 method = 'L-BFGS-B',
                 jac = True,
-                bounds = ([(None,None)] + self.max_conf*[(None, 0)] +
-                    self.max_conf*[(0, None)]),
+                bounds = ([(None,None)] + self.max_conf*[(None, 0)]),
                 options=dict(disp=False))
-        self.meta_d, self.meta_c, self.meta_c_S1, self.meta_c_S2 = (
-                self._get_parameters(result.x))
-        self.logL = -result.fun
-        self.success = result.success
-        self.fit_message = result.message
+        self.meta_d_S1, self.meta_c_S1, self.meta_c2_S1 = (
+                self._get_parameters(result_S1.x))
+        self.logL_S1 = -result_S1.fun
+        self.success_S1 = result_S1.success
+        self.fit_message_S1 = result_S1.message
+        ###############################
+        # fit meta_d for S2 responses #
+        ###############################
+        result_S2 = minimize(self._get_log_likelihood,
+                x0 = [0] + self.max_conf*[0.1],
+                method = 'L-BFGS-B',
+                args = ('S2',),
+                jac = True,
+                bounds = ([(None,None)] + self.max_conf*[(0, None)]),
+                options=dict(disp=False))
+        self.meta_d_S2, self.meta_c_S2, self.meta_c2_S2 = (
+                self._get_parameters(result_S2.x))
+        self.logL_S2 = -result_S2.fun
+        self.success_S2 = result_S2.success
+        self.fit_message_S2 = result_S2.message
 
-    def _get_log_likelihood(self, x, return_der=True):
+    def _get_log_likelihood(self, x, which='S1', return_der=True):
         """Internal method, do not use directly!
 
         Calculates the (negative) log-likelihood of the fitted model.
@@ -167,42 +206,51 @@ class T2SDT(object):
         The docstring to the method _get_parameters explains how x is
         translated to the parameters of the type 2 model
         """
-        meta_d, meta_c, meta_c_S1, meta_c_S2 = self._get_parameters(x)
+        if not which in ['S1', 'S2']:
+            raise ValueError('which must be S1 or S2')
+        meta_d, meta_c, meta_c2 = self._get_parameters(x)
         # initialize an empty matrix of probabilities for each outcome
         # (i.e., for each combination of stimulus, response and confidence)
-        cumprobs = np.empty([2,2, self.max_conf + 2])
-        probs = np.empty([2,2,self.max_conf + 1], float)
+        cumprobs = np.empty([2, self.max_conf + 2])
+        probs = np.empty([2,self.max_conf + 1], float)
         ##########################################
         # calculate the elementary probabilities #
         ##########################################
         # calculate the response-specific cumulative probabilities for all
         # ratings
-        cumprobs[0,0] = np.r_[norm.cdf(np.r_[meta_c, meta_c_S1],
-            -0.5*meta_d),0]
-        cumprobs[1,0] = np.r_[norm.cdf(np.r_[meta_c, meta_c_S1],
-            0.5*meta_d), 0]
-        cumprobs[1,1] = np.r_[norm.sf(np.r_[meta_c, meta_c_S2],
-            0.5*meta_d), 0]
-        cumprobs[0,1] = np.r_[norm.sf(np.r_[meta_c, meta_c_S2],
-            -0.5*meta_d), 0]
+        if which is 'S1':
+            cumprobs[0] = np.r_[norm.cdf(np.r_[meta_c, meta_c2],
+                -0.5*meta_d),0]
+            cumprobs[1] = np.r_[norm.cdf(np.r_[meta_c, meta_c2],
+                0.5*meta_d), 0]
+        else:
+            cumprobs[0] = np.r_[norm.sf(np.r_[meta_c, meta_c2],
+                -0.5*meta_d), 0]
+            cumprobs[1] = np.r_[norm.sf(np.r_[meta_c, meta_c2],
+                0.5*meta_d), 0]
         # calculate the response-specific probabilities for all ratings
         probs = (cumprobs[...,:-1] - cumprobs[...,1:])/cumprobs[...,0,
                 np.newaxis]
         # calculate the log likelihood
-        total_logp = np.sum(np.log(probs)*self.conf_matrix, None)
+        if which is 'S1':
+            total_logp = np.sum(np.log(probs)*self.conf_matrix[:,0], None)
+        else:
+            total_logp = np.sum(np.log(probs)*self.conf_matrix[:,1], None)
         if return_der:
             # calculate the derivative
             total_logp_der = np.zeros(len(x), float)
             # calculate the derivative of cumprobs
-            cumprobs_der = np.zeros([2,2,self.max_conf + 2])
-            cumprobs_der[0,0] = np.r_[norm.pdf(np.r_[
-                meta_c, meta_c_S1], -0.5*meta_d), 0]
-            cumprobs_der[1,0] = np.r_[norm.pdf(np.r_[
-                meta_c, meta_c_S1],  0.5*meta_d), 0]
-            cumprobs_der[1,1] = np.r_[-norm.pdf(np.r_[
-                meta_c, meta_c_S2], 0.5*meta_d), 0]
-            cumprobs_der[0,1] = np.r_[-norm.pdf(np.r_[
-                meta_c, meta_c_S2], -0.5*meta_d), 0]
+            cumprobs_der = np.zeros([2,self.max_conf + 2])
+            if which is 'S1':
+                cumprobs_der[0] = np.r_[norm.pdf(np.r_[
+                    meta_c, meta_c2], -0.5*meta_d), 0]
+                cumprobs_der[1] = np.r_[norm.pdf(np.r_[
+                    meta_c, meta_c2],  0.5*meta_d), 0]
+            else:
+                cumprobs_der[0] = np.r_[-norm.pdf(np.r_[
+                    meta_c, meta_c2], -0.5*meta_d), 0]
+                cumprobs_der[1] = np.r_[-norm.pdf(np.r_[
+                    meta_c, meta_c2], 0.5*meta_d), 0]
             #################################################
             # calculate derivatives for the meta-d' element #
             #################################################
@@ -218,8 +266,12 @@ class T2SDT(object):
                         (cumprobs[...,:-1] - cumprobs[...,1:])*
                         cumprobs_der_meta_d[...,0,np.newaxis])/(
                                 cumprobs[...,0,np.newaxis]**2)
-            total_logp_der[0] = np.sum(
-                    self.conf_matrix/probs*probs_der_meta_d, None)
+            if which is 'S1':
+                total_logp_der[0] = np.sum(
+                        self.conf_matrix[:,0]/probs*probs_der_meta_d, None)
+            else:
+                total_logp_der[0] = np.sum(
+                        self.conf_matrix[:,1]/probs*probs_der_meta_d, None)
             ############################################
             # calculate derivative for the c2 elements #
             ############################################
@@ -227,15 +279,21 @@ class T2SDT(object):
             cumprobs_der_diff = cumprobs_der[...,:-1] - cumprobs_der[...,1:]
             # calculate the derivative of the log od the probs and the
             # product with the confidence ratings
-            log_cumprobs_der = cumprobs_der[...,1:]*self.conf_matrix/probs
-            log_cumprobs_diff_der = cumprobs_der_diff[
-                    ...,1:]*self.conf_matrix[...,1:]/probs[...,1:]
-            for i in range(self.max_conf):
-                total_logp_der[np.array([i + 1, i + 1 + self.max_conf])] = (
-                        log_cumprobs_diff_der[...,i:].sum(0).sum(-1) -
-                        log_cumprobs_der[...,i].sum(0))
-            # return the negative result such that minimization of the
-            # results maximizes the log probability
+            if which is 'S1':
+                log_cumprobs_der = (
+                        cumprobs_der[...,1:]*self.conf_matrix[:,0]/probs)
+                log_cumprobs_diff_der = cumprobs_der_diff[
+                    ...,1:]*self.conf_matrix[...,0,1:]/probs[...,1:]
+            else:
+                log_cumprobs_der = (
+                        cumprobs_der[...,1:]*self.conf_matrix[:,1]/probs)
+                log_cumprobs_diff_der = cumprobs_der_diff[
+                    ...,1:]*self.conf_matrix[...,1,1:]/probs[...,1:]
+            total_logp_der[1:] = (
+                    np.cumsum(
+                        log_cumprobs_diff_der.sum(0)[...,::-1], axis=-1)[
+                            ...,::-1] - log_cumprobs_der[
+                                ...,:self.max_conf].sum(0))
             return -total_logp, -total_logp_der
         else:
             return -total_logp
@@ -247,33 +305,38 @@ class T2SDT(object):
 
         The passed parameter list x consists of
          - meta_d
-         - the (strictly negative) offsets x_S1 such that:
-             meta_c2_S1 = meta_c + np.cumsum(x_S1)
-             The length of x_S1 must be max_conf
-         - the (strictly positive) offsets x_S2 such that:
-             meta_c2_S2 = meta_c + np.cumsum(x_S2)
-             The length of x_S2 must be max_conf
+         - the offsets x2 such that:
+             meta_c2 = meta_c + np.cumsum(x2)
+             The length of x2 must be max_conf.
+             - If x2 is strictly negative, this results in the meta_c2
+             parameters for S1.
+             - If x2 is strictly positive, this results in the meta_c2
+             parameters for S2.
+
         Meta_c is chosen such that meta_c/meta_d' = c/d'
 
         Notes:
             Let d' and c of the primary condition be d' = 2 and c = 1
             max_conf = 2 (i.e., confidence is rated on a scale 0-1-2)
 
-            If a parameter list x = [0.7, -0.1, -0.05, 0.4, 0.6] is passed,
+            If a parameter list x = [0.7, -0.1, -0.05] is passed,
             this leads to the following arguments:
 
             meta_c = c/d' * meta_d = 2/1 * 0.7 = 1.4
             meta_c2_S1 = 1.4 + cumsum([-0.1, -0.05]) = [1.3, 1.25]
-            meta_c2_S2 = 1.4 + cumsum([0.4, 0.6]) = [1.8, 2.4]
+            
+            If a parameter list x = [0.7, 0.1, 0.05] is passed,
+            this leads to the following arguments:
 
+            meta_c = c/d' * meta_d = 2/1 * 0.7 = 1.4
+            meta_c2_S2 = 1.4 + cumsum([0.1, 0.05]) = [1.5, 1.55]
         """
-        if not len(x) == 2*(self.max_conf) + 1:
+        if not len(x) == self.max_conf + 1:
             raise TypeError('length of x does not fit the expected length')
         meta_d = x[0]
         meta_c = self.c/self.d*meta_d
-        meta_c_S1 = meta_c + np.cumsum(x[1:1+self.max_conf])
-        meta_c_S2 = meta_c + np.cumsum(x[-self.max_conf:])
-        return meta_d, meta_c, meta_c_S1, meta_c_S2
+        meta_c2 = meta_c + np.cumsum(x[1:])
+        return meta_d, meta_c, meta_c2
 
 def confusion_matrix(true_label, pred_label, rating, max_conf=None):
     """
@@ -393,7 +456,14 @@ if __name__ == "__main__":
     model.fit()
     print('Results of the simuluated type 2 SDT')
     print('------------------------------------')
-    print('Fitting success: %s' % model.success)
-    print('Fitting message. %s' % model.fit_message)
-    print('d\': %.2f, meta-d\': %.2f, c: %.2f, meta-c: %.2f, logL: %.2f' % (
-            model.d, model.meta_d, model.c, model.meta_c, model.logL))
+    print('d\': %.2f, c: %.2f' % (model.d, model.c))
+    print('------------------------------------')
+    print('S1 model fitting success: %s' % model.success_S1)
+    print('S1 model fitting message:\n    %s' % model.fit_message_S1)
+    print('meta-d_S1\': %.2f, meta-c_S1: %.2f, logL_S1: %.2f' % (
+            model.meta_d_S1, model.meta_c_S1, model.logL_S1))
+    print('------------------------------------')
+    print('S2 model fitting success: %s' % model.success_S2)
+    print('S2 model fitting message:\n    %s' % model.fit_message_S2)
+    print('meta-d_S2\': %.2f, meta-c_S2: %.2f, logL_S2: %.2f' % (
+            model.meta_d_S2, model.meta_c_S2, model.logL_S2))

@@ -9,9 +9,8 @@ and
 > Maniscalco, B., & Lau, H. (2014). Signal detection theory analysis of type 1 and type 2 data: meta-d', response-specific meta-d', and the unequal variance SDT mode. In S. M. Fleming & C. D. Frith (Eds.), The Cognitive Neuroscience of Metacognition (pp.25-66). Springer.
 
 Only the equal variance approach and normally distributed inner decision
-variables are currently supported. Additionally, currently only the overall
-type 2 meta-d' is calculated (i.e., not response specific meta-d'
-variables).
+variables are currently supported. Note, that response-specific meta-d'
+variables are calculated.
 
 ***************************************************************************
 Disclosure:                                                       
@@ -52,9 +51,9 @@ model.fit() # fit the model
 # extract the parameters of the fitted model
 d = model.d # the d' of the type 1 task
 c = model.c # the response bias c of the type 1 task
-meta_d = model.meta_d # the meta-d' of the type 2 task
+meta_d_S1 = model.meta_d_S1 # the meta-d' for S1 responses
+meta_d_S2 = model.meta_d_S2 # the meta-d' for S2 responses
 ```
-
 The docstring included in the code provides more information about the
 calculated parameters and the usage.
 
